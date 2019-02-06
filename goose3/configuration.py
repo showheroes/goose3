@@ -67,6 +67,7 @@ KNOWN_ARTICLE_CONTENT_PATTERNS = [
     ArticleContextPattern(attr='class', value='post-content'),
     ArticleContextPattern(attr='class', value='g-content'),
     ArticleContextPattern(attr='class', value='post-outer'),
+    ArticleContextPattern(attr='class', value='content'),
     ArticleContextPattern(tag='article'),
 ]
 
