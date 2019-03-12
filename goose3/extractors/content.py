@@ -334,13 +334,13 @@ class ContentExtractor(BaseExtractor):
         returns a list of nodes we want to search
         on like paragraphs and tables
         """
-        nodes_to_check = []
+        nodes_to_check = set()
 
         for doc in docs:
             for tag in ['p', 'pre', 'td']:
                 items = self.parser.getElementsByTag(doc, tag=tag)
-                nodes_to_check += items
-        return nodes_to_check
+                [nodes_to_check.add(i) for i in items]
+        return list(nodes_to_check)
 
     def is_table_and_no_para_exist(self, elm):
         sub_paragraphs = self.parser.getElementsByTag(elm, tag='p')
