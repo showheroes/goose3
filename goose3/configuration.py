@@ -119,6 +119,7 @@ KNOWN_PUBLISH_DATE_TAGS = [
     PublishDatePattern(attr='name', value='published_time_telegram', content='content'),
     PublishDatePattern(attr='name', value='parsely-page', content='content', subcontent='pub_date'),
     PublishDatePattern(tag='time'),
+    PublishDatePattern(tag='time', content='datetime'),
     PublishDatePattern(attr='itemprop', value='datePublished', content='content')
 ]
 
@@ -159,7 +160,15 @@ class AuthorPattern(object):
 
 KNOWN_AUTHOR_PATTERNS = [
     AuthorPattern(attr='itemprop', value='author', subpattern=AuthorPattern(attr='itemprop', value='name')),
-    AuthorPattern(attr='name', value='author', content='content')
+    AuthorPattern(attr='itemprop', value='author'),
+    AuthorPattern(attr='rel', value='author'),
+    # covers the standard meta attribute
+    AuthorPattern(attr='name', value='author', content='content'),
+    # article:author mostly holds a URL?
+    AuthorPattern(attr='property', value='article:author', content='content'),
+    # dedicated divs
+    AuthorPattern(tag='div', attr='class', value='author')
+
 ]
 
 
