@@ -51,9 +51,8 @@ class ContentExtractor(BaseExtractor):
                     continue
                 # else use this pattern exclusively
                 else:
-                    nodes = self.parser.getElementsByTag(self.article.doc, tag=item.tag,
+                    return self.parser.getElementsByTag(self.article.doc, tag=item.tag,
                                                               attr=item.attr, value=item.value)
-                    break
             nodes.extend(self.parser.getElementsByTag(self.article.doc, tag=item.tag,
                                                       attr=item.attr, value=item.value))
         if nodes:

@@ -27,6 +27,10 @@ from copy import deepcopy
 import dateutil.parser
 from dateutil.tz import tzutc
 
+import urllib.parse as up
+import unicodedata
+import lxml
+
 from goose3.article import Article
 from goose3.utils import URLHelper, RawHelper
 from goose3.text import get_encodings_from_content
@@ -211,8 +215,22 @@ class Crawler(object):
         # get the full text content and set cleaned_text as a fallback
         self.article._cleaned_text = " ".join(self.extractor.get_full_text(doc))
 
-        # big stuff
-        self.article._top_node = self.extractor.calculate_best_node(doc)
+        # in case we have a direct match, doc is only one element
+        if len(doc) == 1:
+            # check if there is a content attribute
+            if self.parser.getAttribute(doc[0], 'content'):
+                # hack for normalization of spaces
+                tn_string = unicodedata.normalize("NFKC", self.parser.getAttribute(doc[0], 'content'))
+                # hack for french quotation marks
+                tn_string = tn_string.replace(u" \u00BB", '"').replace(u"\u00AB ", '"')
+                # create a dom element from this (div embedded paragraph)
+                self.article._top_node = lxml.etree.fromstring('<div><p>' + tn_string + '</p></div>')
+            # otherwise just use this element as the top node
+            else:
+                self.article._top_node = doc[0]
+        else:
+            # otherwise compute the best node
+            self.article._top_node = self.extractor.calculate_best_node(doc)
 
         # if we do not find an article within the discovered possible article nodes,
         # try again with the root node.
