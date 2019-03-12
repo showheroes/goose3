@@ -62,6 +62,7 @@ class ArticleContextPattern(object):
 
 
 KNOWN_ARTICLE_CONTENT_PATTERNS = [
+    ArticleContextPattern(tag='meta', attr='property', value='articleBody', domain='www.rtl.de'),
     ArticleContextPattern(tag='article'),
     ArticleContextPattern(attr='class', value='content'),
     ArticleContextPattern(attr='class', value='short-story'),

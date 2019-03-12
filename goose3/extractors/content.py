@@ -42,12 +42,18 @@ class ContentExtractor(BaseExtractor):
     def get_known_article_tags(self):
         nodes = []
         for item in self.config.known_context_patterns:
-            # if this is a domain specific config and the current
-            # article domain does not match the configured domain,
-            # do not use the configured content pattern
-            if item.domain and self.article.domain != item.domain:
-                continue
-
+            # check for domain specifics
+            if item.domain:
+                # if this is a domain specific config and the current
+                # article domain does not match the configured domain,
+                # do not use the configured content pattern
+                if self.article.domain != item.domain:
+                    continue
+                # else use this pattern exclusively
+                else:
+                    nodes = self.parser.getElementsByTag(self.article.doc, tag=item.tag,
+                                                              attr=item.attr, value=item.value))
+                    break
             nodes.extend(self.parser.getElementsByTag(self.article.doc, tag=item.tag,
                                                       attr=item.attr, value=item.value))
         if nodes:
