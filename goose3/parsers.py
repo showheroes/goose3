@@ -183,7 +183,7 @@ class Parser(object):
 
     @classmethod
     def getText(cls, node):
-        txts = [i for i in node.itertext()]
+        txts = [i.strip() for i in node.itertext()]
         return innerTrim(' '.join(txts).strip())
 
     @classmethod
