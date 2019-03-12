@@ -22,7 +22,7 @@ limitations under the License.
 """
 
 from goose3.extractors import BaseExtractor
-
+from goose3.text import innerTrim
 
 class AuthorsExtractor(BaseExtractor):
 
@@ -47,14 +47,13 @@ class AuthorsExtractor(BaseExtractor):
 
                     if len(name_nodes) > 0:
                         name = self.parser.getText(name_nodes[0])
-                        authors.add(name)
+                        authors.add(innerTrim(name))
                 else:
-                    if known_tag.tag is None:
+                    if known_tag.content is None:
+                        authors.add(innerTrim(meta_tag.text_content().strip()))
+                    else:
                         name = self.parser.getAttribute(meta_tag, known_tag.content)
                         if not name:
                             continue
-
-                        authors.add(name)
-                    else:
-                        authors.add(meta_tag.text_content().strip())
+                        authors.add(innerTrim(name))
         return list(authors)
