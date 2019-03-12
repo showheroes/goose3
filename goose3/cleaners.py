@@ -115,15 +115,11 @@ class DocumentCleaner(object):
         return doc
 
     def remove_scripts_styles(self, doc):
-        # remove scripts
-        scripts = self.parser.getElementsByTag(doc, tag='script')
-        for item in scripts:
-            self.parser.remove(item)
-
-        # remove styles
-        styles = self.parser.getElementsByTag(doc, tag='style')
-        for item in styles:
-            self.parser.remove(item)
+        # remove scripts and styles
+        for tag in ['script', 'script2', 'style']:
+            items = self.parser.getElementsByTag(doc, tag=tag)
+            for item in items:
+                self.parser.remove(item)
 
         # remove comments
         comments = self.parser.getComments(doc)
