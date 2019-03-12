@@ -203,6 +203,9 @@ class Crawler(object):
         else:
             doc = [self.cleaner.clean(deepcopy(x)) for x in doc]
 
+        # get the full text content and set cleaned_text as a fallback
+        self.article._cleaned_text = " ".join(self.extractor.get_full_text(doc))
+
         # big stuff
         self.article._top_node = self.extractor.calculate_best_node(doc)
 

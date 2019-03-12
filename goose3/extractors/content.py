@@ -74,6 +74,17 @@ class ContentExtractor(BaseExtractor):
 
         return False
 
+    def get_full_text(self, docs):
+        all_strings = set()
+        for doc in docs:
+            for n in self.nodes_to_check(doc):
+                node_text = self.parser.getText(n).strip()
+                # skip empty lines
+                if node_text == '':
+                    continue
+                all_strings.add(node_text)
+        return list(all_strings)
+
     def calculate_best_node(self, doc):
         top_node = None
         nodes_to_check = self.nodes_to_check(doc)
