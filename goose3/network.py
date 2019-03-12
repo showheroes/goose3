@@ -21,7 +21,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 import requests
-
+from urllib.parse import urlparse
 
 class NetworkError(RuntimeError):
     def __init__(self, status_code, reason):
@@ -61,5 +61,9 @@ class NetworkFetcher(object):
         return text
 
     def fetch_obj(self, url):
+        p = urlparse(url)
+        cookies = {}
+        if p.netloc in self.config.cookies:
+            cookies.update(self.config.cookies[p.netloc])
         return self._connection.get(url, timeout=self.config.http_timeout, headers=self.config.http_headers,
-                                    proxies=self.config.http_proxies, auth=self.config.http_auth)
+                                    proxies=self.config.http_proxies, auth=self.config.http_auth, cookies=cookies)

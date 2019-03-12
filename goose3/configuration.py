@@ -185,6 +185,7 @@ class Configuration(object):
         self._http_auth = None
         self._http_proxies = None
         self._http_headers = None
+        self._cookies = {}
 
         # extraction information
         self._local_storage_path = os.path.join(tempfile.gettempdir(), 'goose')
@@ -472,6 +473,17 @@ class Configuration(object):
         ''' set the http_headers property '''
         self._http_headers = val
 
+    @property
+    def cookies(self):
+        ''' dict: Cookies to send when requesting website from a domain. '''
+        return self._cookies
+
+    def add_cookie(self, key, value):
+        ''' Adds a cookie (value) as a dictionary to the cookies.
+            This will be used whenever requesting a page from the domain key.
+        '''
+        self._cookies[key] = value
+        
     @property
     def browser_user_agent(self):
         ''' Browser user agent string to use when making URL requests
