@@ -343,6 +343,8 @@ class ContentExtractor(BaseExtractor):
         nodes_to_check = set()
 
         for doc in docs:
+            if len(self.parser.getChildren(doc)) == 0:
+                nodes_to_check.add(doc)
             for tag in ['p', 'pre', 'td']:
                 items = self.parser.getElementsByTag(doc, tag=tag)
                 [nodes_to_check.add(i) for i in items]
