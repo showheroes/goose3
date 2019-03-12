@@ -47,6 +47,7 @@ from goose3.outputformatters import StandardOutputFormatter
 
 from goose3.network import NetworkFetcher
 
+from langdetect import DetectorFactory, detect
 
 class CrawlCandidate(object):
     def __init__(self, config, url, raw_html):
@@ -55,6 +56,7 @@ class CrawlCandidate(object):
         self.parser = self.config.get_parser()
         self.url = url
         self.raw_html = raw_html
+        DetectorFactory.seed = 0
 
 
 class Crawler(object):
@@ -241,6 +243,10 @@ class Crawler(object):
             # clean_text
             self.article._cleaned_text = self.formatter.get_formatted_text()
 
+        # after extracting content, check for language again
+        if self.article._meta_lang == None:
+            self.article._meta_lang = detect(self.article.cleaned_text)
+            
         # cleanup tmp file
         self.release_resources()
 
