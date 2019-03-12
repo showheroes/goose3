@@ -62,13 +62,13 @@ class ArticleContextPattern(object):
 
 
 KNOWN_ARTICLE_CONTENT_PATTERNS = [
+    ArticleContextPattern(tag='article'),
+    ArticleContextPattern(attr='class', value='content'),
     ArticleContextPattern(attr='class', value='short-story'),
     ArticleContextPattern(attr='itemprop', value='articleBody'),
     ArticleContextPattern(attr='class', value='post-content'),
     ArticleContextPattern(attr='class', value='g-content'),
     ArticleContextPattern(attr='class', value='post-outer'),
-    ArticleContextPattern(attr='class', value='content'),
-    ArticleContextPattern(tag='article'),
 ]
 
 
