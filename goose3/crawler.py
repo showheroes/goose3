@@ -169,7 +169,10 @@ class Crawler(object):
         self.article._meta_keywords = metas['keywords']
         self.article._meta_encoding = metas['encoding']
         self.article._canonical_link = metas['canonical']
-        self.article._domain = metas['domain']
+        if 'domain' in metas:
+            self.article._domain = metas['domain']
+        else:
+            self.article._domain = up.urlparse(self.article.final_url).netloc
 
         # publishdate
         self.article._publish_date = self.publishdate_extractor.extract()
