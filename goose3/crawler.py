@@ -264,10 +264,10 @@ class Crawler(object):
             # clean_text
             self.article._cleaned_text = self.formatter.get_formatted_text()
 
-        # after extracting content, check for language again
-        if self.article._meta_lang == None:
-            self.article._meta_lang = detect(self.article.cleaned_text)
-            
+        # after extracting content, check for language again, override meta setting
+        if self.article.cleaned_text and self.article.cleaned_text != '':
+            self.article._meta_lang = langdetect.detect(self.article.cleaned_text)
+
         # cleanup tmp file
         self.release_resources()
 
