@@ -70,6 +70,8 @@ KNOWN_ARTICLE_CONTENT_PATTERNS = [
     ArticleContextPattern(attr='class', value='post-content'),
     ArticleContextPattern(attr='class', value='g-content'),
     ArticleContextPattern(attr='class', value='post-outer'),
+    ArticleContextPattern(tag='div', attr='class', value='container'),
+    ArticleContextPattern(tag='div', attr='class', value='articletext')
 ]
 
 
@@ -484,7 +486,7 @@ class Configuration(object):
             This will be used whenever requesting a page from the domain key.
         '''
         self._cookies[key] = value
-        
+
     @property
     def browser_user_agent(self):
         ''' Browser user agent string to use when making URL requests
