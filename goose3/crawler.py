@@ -22,6 +22,7 @@ limitations under the License.
 """
 import os
 import glob
+import re
 from copy import deepcopy
 
 import dateutil.parser
@@ -266,6 +267,11 @@ class Crawler(object):
 
         if self.article.cleaned_text and self.article.cleaned_text != '':
             self.article._meta_lang = langdetect.detect(self.article.cleaned_text)
+
+        # final check if schema contains article body, if so, use it
+        if 'articleBody' in self.article._schema:
+            self.article._cleaned_text = re.sub("<.*?>", "", self.article.schema['articleBody']).replace('\n','')
+            # TODO: check whether to do this for publish date etc. as well
 
         # cleanup tmp file
         self.release_resources()
