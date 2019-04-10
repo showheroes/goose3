@@ -180,7 +180,11 @@ class Crawler(object):
             self.article._domain = up.urlparse(self.article.final_url).netloc
 
         # publishdate
-        self.article._publish_date = self.publishdate_extractor.extract()
+        if 'datePublished' in self.article.schema:
+            self.article._publish_date = self.article.schema['datePublished']
+        else:
+            self.article._publish_date = self.publishdate_extractor.extract()
+
         if self.article.publish_date:
             try:
                 publish_datetime = dateutil.parser.parse(self.article.publish_date)
@@ -195,7 +199,23 @@ class Crawler(object):
         self.article._tags = self.tags_extractor.extract()
 
         # authors
-        self.article._authors = self.authors_extractor.extract()
+        if 'author' in self.article.schema:
+            if isinstance(self.article.schema['author'], list):
+                self.article._authors = list(map(lambda entry : entry['name'], self.article.schema['author']))
+            elif isinstance(self.article.schema['author'], dict):
+                author_string = self.article.schema['author']['name']
+                if ',' in author_string:
+                    self.article._authors = list(map(str.strip, author_string.split(',')))
+                elif ' und ' in author_string:
+                    self.article._authors = list(map(str.strip, author_string.split(' und ')))
+                elif ' and ' in author_string:
+                    self.article._authors = list(map(str.strip, author_string.split(' and ')))
+                else:
+                    self.article._authors = [author_string]
+        else:
+            self.article._authors = self.authors_extractor.extract()
+
+        self.article._authors = list(map(str.title, self.article.authors))
 
         # title
         self.article._title = self.title_extractor.extract()
@@ -203,75 +223,69 @@ class Crawler(object):
         # check for known node as content body
         # if we find one force the article.doc to be the found node
         # this will prevent the cleaner to remove unwanted text content
-        article_body = self.extractor.get_known_article_tags()
-        if article_body is not None:
-            doc = article_body
-
-        # before we do any calcs on the body itself let's clean up the document
-        if not isinstance(doc, list):
-            doc = [self.cleaner.clean(doc)]
+        if 'articleBody' in self.article.schema:
+            self.article._cleaned_text = self.clean_plain_text(self.article.schema['articleBody'])
+        elif 'articleBody' in metas:
+            self.article._cleaned_text = self.clean_plain_text(metas['articleBody'])
+        elif 'articleBody' in self.article.opengraph:
+            self.article._cleaned_text = self.clean_plain_text(self.article.opengraph['articleBody'])
         else:
-            doc = [self.cleaner.clean(deepcopy(x)) for x in doc]
+            article_body = self.extractor.get_known_article_tags()
+            if article_body is not None:
+                doc = article_body
 
-        # get the full text content and set cleaned_text as a fallback
-        self.article._cleaned_text = " ".join(self.extractor.get_full_text(doc))
-
-        # in case we have a direct match, doc is only one element
-        if len(doc) == 1:
-            # check if there is a content attribute
-            if self.parser.getAttribute(doc[0], 'content'):
-                # hack for normalization of spaces
-                tn_string = unicodedata.normalize("NFKC", self.parser.getAttribute(doc[0], 'content'))
-                # hack for french quotation marks
-                tn_string = tn_string.replace(u" \u00BB", '"').replace(u"\u00AB ", '"')
-                # create a dom element from this (div embedded paragraph)
-                self.article._top_node = lxml.etree.fromstring('<div><p>' + tn_string + '</p></div>')
-            # otherwise just use this element as the top node
+            # before we do any calcs on the body itself let's clean up the document
+            if not isinstance(doc, list):
+                doc = [self.cleaner.clean(doc)]
             else:
-                self.article._top_node = doc[0]
-        else:
+                doc = [self.cleaner.clean(deepcopy(x)) for x in doc]
+
+            # get the full text content and set cleaned_text as a fallback
+            self.article._cleaned_text = " ".join(self.extractor.get_full_text(doc))
+
             # otherwise compute the best node
             self.article._top_node = self.extractor.calculate_best_node(doc)
 
-        # if we do not find an article within the discovered possible article nodes,
-        # try again with the root node.
-        if self.article._top_node is None:
+            # if we do not find an article within the discovered possible article nodes,
             # try again with the root node.
-            self.article._top_node = self.extractor.calculate_best_node(self.article._doc)
-        else:
-            # set the doc member to the discovered article node.
-            self.article._doc = doc
+            if self.article._top_node is None:
+                # try again with the root node.
+                self.article._top_node = self.extractor.calculate_best_node(self.article._doc)
+            else:
+                # set the doc member to the discovered article node.
+                self.article._doc = doc
 
-        # if we have a top node
-        # let's process it
-        if self.article._top_node is not None:
+            # if we have a top node
+            # let's process it
+            if self.article._top_node is not None:
 
-            # article links
-            self.article._links = self.links_extractor.extract()
+                # article links
+                self.article._links = self.links_extractor.extract()
 
-            # tweets
-            self.article._tweets = self.tweets_extractor.extract()
+                # tweets
+                self.article._tweets = self.tweets_extractor.extract()
 
-            # video handling
-            self.article._movies = self.video_extractor.get_videos()
+                # video handling
+                self.article._movies = self.video_extractor.get_videos()
 
-            # image handling
-            if self.config.enable_image_fetching:
-                self.get_image()
+                # image handling
+                if self.config.enable_image_fetching:
+                    self.get_image()
 
-            # post cleanup
-            self.article._top_node = self.extractor.post_cleanup()
+                # post cleanup
+                self.article._top_node = self.extractor.post_cleanup()
 
-            # clean_text
-            self.article._cleaned_text = self.formatter.get_formatted_text()
+                # clean_text
+                self.article._cleaned_text = self.clean_plain_text(self.formatter.get_formatted_text())
+
+        # check for image in linked data
+        if self.config.enable_image_fetching:
+            if 'image' in self.article.schema:
+                self.article._top_image = self.get_image_extractor().get_image(self.article.schema['image']['url'], extraction_type="Linked Data")
 
         if self.article.cleaned_text and self.article.cleaned_text != '':
             self.article._meta_lang = langdetect.detect(self.article.cleaned_text)
 
-        # final check if schema contains article body, if so, use it
-        if 'articleBody' in self.article._schema:
-            self.article._cleaned_text = re.sub("<.*?>", "", self.article.schema['articleBody']).replace('\n','')
-            # TODO: check whether to do this for publish date etc. as well
 
         # cleanup tmp file
         self.release_resources()
@@ -284,6 +298,19 @@ class Crawler(object):
         if crawl_candidate.raw_html:
             return RawHelper.get_parsing_candidate(crawl_candidate.url, crawl_candidate.raw_html)
         return URLHelper.get_parsing_candidate(crawl_candidate.url)
+
+    def clean_plain_text(self, raw_text):
+        # strip html tags
+        res = re.sub("<.*?>", "", raw_text)
+        # replace strange spaces
+        res = unicodedata.normalize("NFKC", res)
+        # replace french quotation marks
+        res = re.sub("[\u00BB\u00AB\u201C\u201D\u201E]", '"', res)
+        # replace line feeds
+        res = res.replace('\n', ' ')
+        # shrink multiple spaces to one
+        res = re.sub("\s+", " ", res)
+        return res
 
     def get_image(self):
         doc = self.article.raw_doc
