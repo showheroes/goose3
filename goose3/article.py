@@ -191,7 +191,7 @@ class Article(object):
 
             Note:
                 Read only '''
-        return [min(self._authors, key=len)] if len(self._authors) > 0 else []
+        return self._authors
 
     @property
     def final_url(self):
