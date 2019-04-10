@@ -43,15 +43,15 @@ class SchemaExtractor(BaseExtractor):
                 content = json.loads(meta.text_content())
                 if isinstance(content, list):
                     for context in content:
-                        if (context["@context"] == "http://schema.org" and
+                        if (context["@context"].endswith("schema.org") and
                                 context["@type"] in KNOWN_SCHEMA_TYPES):
                             return content
                 elif isinstance(content, dict):
-                    if (content["@context"] == "http://schema.org" and
+                    if (content["@context"].endswith("schema.org") and
                             content["@type"] in KNOWN_SCHEMA_TYPES):
                         return content
             except (ValueError, KeyError):
                 # If the contents are not proper JSON or a key we expect
                 # to exist does not, continue to the next tag.
                 continue
-        return None
+        return {}
