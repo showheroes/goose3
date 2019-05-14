@@ -292,7 +292,8 @@ class Article(object):
             "movies": [],
             "links": self.links,
             "authors": self.authors,
-            "publish_date": self.publish_date
+            "publish_date": self.publish_date,
+            "final_url": self.final_url
         }
 
         # image
