@@ -304,6 +304,8 @@ class Crawler(object):
         res = re.sub("<.*?>", "", raw_text)
         # replace strange spaces
         res = unicodedata.normalize("NFKC", res)
+        # replace soft hyphens
+        res = re.sub('[\xc2\xad]', '', res)
         # replace french quotation marks
         res = re.sub("[\u00BB\u00AB\u201C\u201D\u201E]", '"', res)
         # replace line feeds
