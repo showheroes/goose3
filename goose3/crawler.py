@@ -203,8 +203,13 @@ class Crawler(object):
             if isinstance(self.article.schema['author'], list):
                 self.article._authors = list(map(lambda entry : entry['name'], self.article.schema['author']))
             elif isinstance(self.article.schema['author'], dict):
-                author_string = self.article.schema['author']['name']
-                if ',' in author_string:
+                author_string = self.article.schema['author']['name'] if 'name' in self.article.schema['author'] else ''
+                if not author_string:
+                    if 'publisher' in self.article.schema:
+                        if 'name' in self.article.schema['publisher']:
+                            self.article._authors = [self.article.schema['publisher']['name']]
+                    self.article._authors = []
+                elif ',' in author_string:
                     self.article._authors = list(map(str.strip, author_string.split(',')))
                 elif ' und ' in author_string:
                     self.article._authors = list(map(str.strip, author_string.split(' und ')))
