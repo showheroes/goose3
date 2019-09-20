@@ -183,6 +183,8 @@ class Parser(object):
 
     @classmethod
     def getText(cls, node):
+        if not isinstance(node, lxml.html.HtmlElement):
+            return ''
         txts = [i.strip() for i in node.itertext()]
         return innerTrim(' '.join(txts).strip())
 
