@@ -235,7 +235,7 @@ class Crawler(object):
         elif 'articleBody' in self.article.opengraph:
             self.article._cleaned_text = self.clean_plain_text(self.article.opengraph['articleBody'])
         else:
-            article_body = self.extractor.get_known_article_tags()
+            (article_body, domain_match) = self.extractor.get_known_article_tags()
             if article_body is not None:
                 doc = article_body
 
@@ -249,13 +249,13 @@ class Crawler(object):
             self.article._cleaned_text = " ".join(self.extractor.get_full_text(doc))
 
             # otherwise compute the best node
-            self.article._top_node = self.extractor.calculate_best_node(doc)
+            self.article._top_node = self.extractor.calculate_best_node(doc, domain_match)
 
             # if we do not find an article within the discovered possible article nodes,
             # try again with the root node.
             if self.article._top_node is None:
                 # try again with the root node.
-                self.article._top_node = self.extractor.calculate_best_node(self.article._doc)
+                self.article._top_node = self.extractor.calculate_best_node(self.article._doc, domain_match)
             else:
                 # set the doc member to the discovered article node.
                 self.article._doc = doc

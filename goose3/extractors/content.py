@@ -51,13 +51,13 @@ class ContentExtractor(BaseExtractor):
                     continue
                 # else use this pattern exclusively
                 else:
-                    return self.parser.getElementsByTag(self.article.doc, tag=item.tag,
-                                                              attr=item.attr, value=item.value)
+                    return (self.parser.getElementsByTag(self.article.doc, tag=item.tag,
+                                                              attr=item.attr, value=item.value), True)
             nodes.extend(self.parser.getElementsByTag(self.article.doc, tag=item.tag,
                                                       attr=item.attr, value=item.value))
         if nodes:
-            return nodes
-        return None
+            return (nodes, False)
+        return (None, False)
 
     def is_articlebody(self, node):
         for item in self.config.known_context_patterns:
@@ -90,7 +90,7 @@ class ContentExtractor(BaseExtractor):
                 all_strings.add(node_text)
         return list(all_strings)
 
-    def calculate_best_node(self, doc):
+    def calculate_best_node(self, doc, domain_match):
         top_node = None
         nodes_to_check = self.nodes_to_check(doc)
 
@@ -142,6 +142,8 @@ class ContentExtractor(BaseExtractor):
                         parent_nodes.append(parent_node)
 
                     updateParent(parent_node, depth+1)
+                elif domain_match:
+                    self.update_score(node, upscore*2.5/(depth))
 
             updateParent(node)
 
