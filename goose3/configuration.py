@@ -66,6 +66,7 @@ KNOWN_ARTICLE_CONTENT_PATTERNS = [
     ArticleContextPattern(tag='div', attr='class', value='row-weather-report', domain='www.wetter.de'),
     ArticleContextPattern(tag='div', attr='class', value='main-content-div', domain='www.arcor.de'),
     ArticleContextPattern(tag='div', attr='class', value='article__paragraphs', domain='www.superillu.de'),
+    ArticleContextPattern(tag='article', domain='www.drei.at'),
     ArticleContextPattern(tag='article'),
     ArticleContextPattern(attr='class', value='content'),
     ArticleContextPattern(attr='class', value='short-story'),
